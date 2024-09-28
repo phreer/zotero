@@ -87,6 +87,9 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/locateMenu.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/menuAccessKey.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/containers/tagSelectorContainer.js", this);
+		Zotero.Zotero_Tabs = this.Zotero_Tabs;
+		Zotero.window = this;
+		console.log(Zotero);
 	</script>
 	
 	<commandset id="mainCommandSet">

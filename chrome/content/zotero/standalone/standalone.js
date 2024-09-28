@@ -309,7 +309,7 @@ const ZoteroStandalone = new function() {
 
 		let win = Zotero.getMainWindow();
 		if (win) {
-			if (win.Zotero_Tabs.selectedID == 'zotero-pane') {
+			if (Zotero.Zotero_Tabs.selectedID == 'zotero-pane') {
 				try {
 					selected = win.ZoteroPane.getSelectedItems();
 				}
@@ -318,7 +318,7 @@ const ZoteroStandalone = new function() {
 				win.ZoteroPane.updateQuickCopyCommands(selected);
 			}
 			else {
-				let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+				let reader = Zotero.Reader.getByTabID(Zotero.Zotero_Tabs.selectedID);
 				if (reader) {
 					let item = Zotero.Items.get(reader.itemID);
 					selected = item.parentItem && [item.parentItem] || [];

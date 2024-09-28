@@ -37,6 +37,7 @@ const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 
 const UNLOAD_UNUSED_AFTER = 86400; // 24h
 
 var Zotero_Tabs = new function () {
+	console.log(this);
 	Object.defineProperty(this, 'selectedID', {
 		get: () => this._selectedID
 	});

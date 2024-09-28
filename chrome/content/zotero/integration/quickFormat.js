@@ -641,7 +641,7 @@ var Zotero_QuickFormat = new function () {
 	async function _getMatchingReaderOpenItems(options) {
 		if (Zotero_QuickFormat.citingNotes) return [];
 		let win = Zotero.getMainWindow();
-		let tabs = win.Zotero_Tabs.getState();
+		let tabs = Zotero.Zotero_Tabs.getState();
 		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
 			// Sort selected tab first
 			if (a.selected) return -1;
@@ -690,7 +690,7 @@ var Zotero_QuickFormat = new function () {
 
 		let win = Zotero.getMainWindow();
 		let selectedItems = [];
-		if (win.Zotero_Tabs.selectedType === "library") {
+		if (Zotero.Zotero_Tabs.selectedType === "library") {
 			if (!Zotero_QuickFormat.citingNotes) {
 				selectedItems = Zotero.getActiveZoteroPane().getSelectedItems().filter(i => i.isRegularItem());
 				// Filter out already cited items

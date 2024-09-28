@@ -115,7 +115,7 @@ function modify_omni {
 	unzip omni.ja
 	rm omni.ja
 	
-	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
+	# replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
 	
 	# https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/internals/preferences.html
 	#

@@ -299,7 +299,7 @@ class ReaderInstance {
 				else if (this.tabID) {
 					let win = Zotero.getMainWindow();
 					if (win) {
-						win.Zotero_Tabs.setSecondViewState(this.tabID, state);
+						Zotero.Zotero_Tabs.setSecondViewState(this.tabID, state);
 					}
 				}
 			},
@@ -512,7 +512,7 @@ class ReaderInstance {
 				let focused = win.ZoteroContextPane.focus();
 				// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
 				if (!focused) {
-					win.Zotero_Tabs.moveFocus("current");
+					Zotero.Zotero_Tabs.moveFocus("current");
 				}
 			},
 			onSetZoom: (iframe, zoom) => {
@@ -1012,7 +1012,7 @@ class ReaderInstance {
 		if (this.tabID) {
 			let win = Zotero.getMainWindow();
 			if (win) {
-				win.Zotero_Tabs.setSecondViewState(this.tabID, this.getSecondViewState());
+				Zotero.Zotero_Tabs.setSecondViewState(this.tabID, this.getSecondViewState());
 			}
 		}
 	}
@@ -1069,15 +1069,18 @@ class ReaderTab extends ReaderInstance {
 		this._onToggleSidebarCallback = options.onToggleSidebar;
 		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
+		this._document = this._window.document.getElementsByTagName('browser')[1].contentDocument;
 		let existingTabID = options.tabID;
 		// If an unloaded tab for this item already exists, load the reader in it.
 		// Otherwise, create a new tab
 		if (existingTabID) {
 			this.tabID = existingTabID;
-			this._tabContainer = this._window.document.getElementById(existingTabID);
+			console.log(existingTabID);
+			this._tabContainer = this._document.getElementById(existingTabID);
+			console.log(this._tabContainer);
 		}
 		else {
-			let { id, container } = this._window.Zotero_Tabs.add({
+			let { id, container } = Zotero.Zotero_Tabs.add({
 				id: options.tabID,
 				type: 'reader',
 				title: options.title || '',
@@ -1092,7 +1095,7 @@ class ReaderTab extends ReaderInstance {
 			this._tabContainer = container;
 		}
 		
-		this._iframe = this._window.document.createXULElement('browser');
+		this._iframe = this._document.createXULElement('browser');
 		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
@@ -1101,7 +1104,7 @@ class ReaderTab extends ReaderInstance {
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
 		
-		this._popupset = this._window.document.createXULElement('popupset');
+		this._popupset = this._document.createXULElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
 		
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
@@ -1118,7 +1121,7 @@ class ReaderTab extends ReaderInstance {
 		this._window.removeEventListener('pointerdown', this._handlePointerDown);
 		this._window.removeEventListener('pointerup', this._handlePointerUp);
 		if (this.tabID) {
-			this._window.Zotero_Tabs.close(this.tabID);
+			Zotero.Zotero_Tabs.close(this.tabID);
 		}
 	}
 
@@ -1132,7 +1135,7 @@ class ReaderTab extends ReaderInstance {
 
 	// We don't want to send fake pointerup event, if pointerdown and pointerup was in the same iframe
 	_handlePointerDown = (event) => {
-		if (this._window.Zotero_Tabs.selectedID === this.tabID
+		if (Zotero.Zotero_Tabs.selectedID === this.tabID
 			&& event.target.closest('#outerContainer')) {
 			this._pointerDownWindow = event.target.ownerDocument.defaultView;
 		}
@@ -1144,7 +1147,7 @@ class ReaderTab extends ReaderInstance {
 	_handlePointerUp = (event) => {
 		try {
 			var _window = event.target.ownerDocument.defaultView;
-			if (this._window.Zotero_Tabs.selectedID === this.tabID
+			if (Zotero.Zotero_Tabs.selectedID === this.tabID
 				// If the event isn't inside a reader PDF.js iframe, or isn't the same iframe (if using split view)
 				&& (!event.target.closest('#outerContainer') || this._pointerDownWindow !== _window)
 				&& this._pointerDownWindow
@@ -1176,7 +1179,7 @@ class ReaderTab extends ReaderInstance {
 	};
 
 	_setTitleValue(title) {
-		this._window.Zotero_Tabs.rename(this.tabID, title);
+		Zotero.Zotero_Tabs.rename(this.tabID, title);
 	}
 
 	_addToNote(annotations) {
@@ -1683,7 +1686,8 @@ class Reader {
 	_loadSidebarState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
-			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
+			console.log(win);
+			let pane = win.document.getElementsByTagName('browser')[1].contentDocument.getElementById('zotero-reader-sidebar-pane');
 			this._sidebarOpen = pane.getAttribute('collapsed') == 'false';
 			let width = pane.getAttribute('width');
 			if (width) {
@@ -1696,8 +1700,7 @@ class Reader {
 		let win = Zotero.getMainWindow();
 		if (win) {
 			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
-			pane.setAttribute('collapsed', this._sidebarOpen ? 'false' : 'true');
-			pane.setAttribute('width', this._sidebarWidth);
+			pane.setAttribute('collapsed', this._sidebarOpen ? 'false' : 'true'); pane.setAttribute('width', this._sidebarWidth);
 		}
 	}
 	
@@ -1835,9 +1838,9 @@ class Reader {
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
 			if (win) {
-				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+				let existingTabID = Zotero.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
+					Zotero.Zotero_Tabs.select(existingTabID, false, { location });
 					return undefined;
 				}
 			}
@@ -1852,7 +1855,7 @@ class Reader {
 
 		if (reader) {
 			if (reader instanceof ReaderTab) {
-				reader._window.Zotero_Tabs.select(reader.tabID, true);
+				Zotero.Zotero_Tabs.select(reader.tabID, true);
 			}
 			
 			if (location) {
@@ -1905,11 +1908,11 @@ class Reader {
 			});
 			this._readers.push(reader);
 			// Change tab's type from "reader-unloaded" to "reader" after reader loaded
-			win.Zotero_Tabs.markAsLoaded(tabID);
+			Zotero.Zotero_Tabs.markAsLoaded(tabID);
 		}
 		
 		if (!openInBackground
-			&& !win.Zotero_Tabs.focusOptions.keepTabFocused) {
+			&& !Zotero.Zotero_Tabs.focusOptions.keepTabFocused) {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
@@ -1971,3 +1974,4 @@ class Reader {
 
 Zotero.Reader = new Reader();
 Zotero.addShutdownListener(() => Zotero.Reader.flushAllReaderStates());
+console.trace('Trace in reader.js');

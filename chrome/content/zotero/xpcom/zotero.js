@@ -1987,6 +1987,11 @@ Zotero.VersionHeader = {
 					channel.setRequestHeader('User-Agent', ua, false);
 				}
 			}
+			channel = subject.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+			let ua = channel.getRequestHeader('User-Agent');
+			ua = this.update(ua);
+			console.log("set user agent", ua);
+			channel.setRequestHeader('User-Agent', ua, false);
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
